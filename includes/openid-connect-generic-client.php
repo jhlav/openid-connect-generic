@@ -5,6 +5,7 @@ class OpenID_Connect_Generic_Client {
 	private $client_id;
 	private $client_secret;
 	private $scope;
+	private $hd;
 	private $endpoint_login;
 	private $endpoint_userinfo;
 	private $endpoint_token;
@@ -21,6 +22,7 @@ class OpenID_Connect_Generic_Client {
 	 * @param $client_id
 	 * @param $client_secret
 	 * @param $scope
+	 * @param $hd
 	 * @param $endpoint_login
 	 * @param $endpoint_userinfo
 	 * @param $endpoint_token
@@ -31,6 +33,7 @@ class OpenID_Connect_Generic_Client {
 		$this->client_id = $client_id;
 		$this->client_secret = $client_secret;
 		$this->scope = $scope;
+		$this->hd = $hd;
 		$this->endpoint_login = $endpoint_login;
 		$this->endpoint_userinfo = $endpoint_userinfo;
 		$this->endpoint_token = $endpoint_token;
@@ -48,13 +51,20 @@ class OpenID_Connect_Generic_Client {
 		if ( stripos( $this->endpoint_login, '?' ) !== FALSE ) {
 			$separator = '&';
 		}
-		$url = sprintf( '%1$s%2$sresponse_type=code&scope=%3$s&client_id=%4$s&state=%5$s&redirect_uri=%6$s',
+
+		$arg_hd = '';
+		if ( ! empty( $this->hd ) ) {
+			$arg_hd = '&hd=' . urlencode( $this->hd );
+		}
+
+		$url = sprintf( '%1$s%2$sresponse_type=code&scope=%3$s&client_id=%4$s&state=%5$s&redirect_uri=%6$s%7$s',
 			$this->endpoint_login,
 			$separator,
 			urlencode( $this->scope ),
 			urlencode( $this->client_id ),
 			$this->new_state(),
-			urlencode( $this->redirect_uri )
+			urlencode( $this->redirect_uri ),
+			$arg_hd
 		);
 
 		return apply_filters( 'openid-connect-generic-auth-url', $url );
@@ -329,7 +339,13 @@ class OpenID_Connect_Generic_Client {
 		if ( ! isset( $id_token_claim['sub'] ) || empty( $id_token_claim['sub'] ) ) {
 			return new WP_Error( 'no-subject-identity', __( 'No subject identity' ), $id_token_claim );
 		}
-		
+
+		if ( ! empty( $this->hd ) ) {
+			if ( ! isset( $id_token_claim['hd'] ) || $id_token_claim['hd'] !== $this->hd ) {
+				return new WP_Error( 'identity-not-in-hosted-domains', __('Identity email ' . $id_token_claim['email'] . ' does not belong to allowed domain(s): ' . $this->hd), $id_token_claim );
+			}
+		}
+
 		return true;
 	}
 

@@ -94,6 +94,7 @@ class OpenID_Connect_Generic {
 			$this->settings->client_id,
 			$this->settings->client_secret,
 			$this->settings->scope,
+			$this->settings->hd,
 			$this->settings->endpoint_login,
 			$this->settings->endpoint_userinfo,
 			$this->settings->endpoint_token,

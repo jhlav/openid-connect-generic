@@ -68,6 +68,13 @@ class OpenID_Connect_Generic_Settings_Page {
 				'type'        => 'text',
 				'section'     => 'client_settings',
 			),
+			'hd'                => array(
+					'title'       => __( 'Hosted Domains' ),
+				'description' => __( 'Set "hd" query parameter when logging in with Identity provider. Identity provider will only list accounts for this domain. This plugin validates that the returned identity token has a claim for this domain. When "*" is entered any hosted account can be used.' ),
+				'example'     => 'example.com',
+				'type'        => 'text',
+				'section'     => 'client_settings',
+			),
 			'endpoint_login'    => array(
 				'title'       => __( 'Login Endpoint URL' ),
 				'description' => __( 'Identify provider authorization endpoint.' ),
